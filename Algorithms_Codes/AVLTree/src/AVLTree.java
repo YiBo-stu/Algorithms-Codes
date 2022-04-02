@@ -7,13 +7,14 @@ public class AVLTree<K extends Comparable<K>, V> {
         public V value;
         public Node left;
         public Node right;
+        // 用height记录每个节点的高度
         public int height;
-
         public Node(K key, V value){
             this.key = key;
             this.value = value;
             left = null;
             right = null;
+            // 新建节点height的高度为1
             height = 1;
         }
     }
@@ -34,7 +35,7 @@ public class AVLTree<K extends Comparable<K>, V> {
         return size == 0;
     }
 
-    // 判断二叉树是否是二分搜索树
+    // 判断二叉树是否是二分搜索树，二分搜索树中序遍历的有序性进行判断
     public boolean isBST(){
         ArrayList<K> keys = new ArrayList<>();
         inOrder(root, keys);
@@ -158,26 +159,30 @@ public class AVLTree<K extends Comparable<K>, V> {
         else
             // 要添加的键值对已存在，则更新键对应的值
             node.value = value;
+
         // 更新height
         node.height = 1 + Math.max(getHeight(node.left), getHeight(node.right));
         // 计算平衡因子
         int balanceFactor = getBalanceFactor(node);
-        // LL
+        // 平衡维护，根据情况不同有几种不同的维护方式
+        // LL，新插入节点在不平衡节点左侧的左侧，进行右旋转，并且在旋转之后维护节点高度
         if(balanceFactor > 1 && getBalanceFactor(node.left) >= 0)
             return rightRotate(node);
-        // RR
+        // RR，左旋转，并且在旋转之后维护节点高度
         if(balanceFactor < -1 && getBalanceFactor(node.right) <= 0)
             return leftRotate(node);
-        // LR
+        // LR，对不平衡节点的左孩子进行左旋转，然后对不平衡节点进行右旋转
         if(balanceFactor > 1 && getBalanceFactor(node.left) < 0){
             node.left = leftRotate(node.left);
             return rightRotate(node);
         }
-        // RL
+        // RL，对不平衡节点的右孩子进行右旋转，然后对不平衡节点进行左旋转
         if(balanceFactor < -1 && getBalanceFactor(node.right) > 0){
             node.right = rightRotate(node.right);
             return leftRotate(node);
         }
+        // 这是一个回溯的过程，对每个节点维护完平衡性，回到递归的上一层
+        // 这样就沿着新添加的节点向上维护了树的平衡性
         return node;
     }
 
@@ -216,6 +221,7 @@ public class AVLTree<K extends Comparable<K>, V> {
             retNode = node;
         }
         else{
+            // 这与BST中的逻辑稍有不同，几种情况是互斥的关系，所以用if-else
             if(node.left == null){
                 Node rightNode = node.right;
                 node.right = null;
@@ -231,7 +237,7 @@ public class AVLTree<K extends Comparable<K>, V> {
             else{
                 // 待删除节点左右字数都不为空的情况
                 Node successor = minimum(node.right);
-                // remove函数已经加上了对平衡性的处理
+                // remove函数已经加上了对平衡性的处理，而removeMin没有
                 // 所以用remove替换removeMin
                 successor.right = remove(node.right, successor.key);
                 successor.left = node.left;
@@ -239,13 +245,14 @@ public class AVLTree<K extends Comparable<K>, V> {
                 retNode = successor;
             }
         }
-
-        if(retNode == null)
-            return null;
+        // 在返回之前，维护retNode节点的平衡性
+        // 如果删除的是叶子节点，就不需要维护平衡
+        if(retNode == null) return null;
         // 更新height
         retNode.height = 1 + Math.max(getHeight(retNode.left), getHeight(retNode.right));
         // 计算平衡因子
         int balanceFactor = getBalanceFactor(retNode);
+        // 平衡维护
         // LL
         if(balanceFactor > 1 && getBalanceFactor(retNode.left) >= 0)
             return rightRotate(retNode);
