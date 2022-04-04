@@ -13,6 +13,9 @@ public class SubstringMatchHelper {
         else if(name.equals("rabinKarp")){
             pos = SubstringMatch.rabinKarp(s, t);
         }
+        else if(name.equals("KMP")){
+            pos = SubstringMatch.KMP(s, t);
+        }
         long endTime = System.nanoTime();
 
         double time = (endTime - startTime) / 1000000000.0;

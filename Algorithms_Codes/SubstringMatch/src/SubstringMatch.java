@@ -46,11 +46,40 @@ public class SubstringMatch {
         return true;
     }
 
+    public static int KMP(String s, String t) {
+
+        if(s.length() < t.length()) return -1;
+        if(t.length() == 0) return 0;
+
+        // pmt: partial match table
+        int[] pmt = new int[t.length()];
+        for(int i = 1, j = 0; i < t.length(); i ++) {
+            while(j > 0 && t.charAt(i) != t.charAt(j)) {
+                j = pmt[j - 1];
+            }
+            if(t.charAt(i) == t.charAt(j)) {
+                pmt[i] = ++ j;
+            }
+        }
+        for(int i = 0, j = 0; i < s.length(); i ++) {
+            while(j > 0 && s.charAt(i) != t.charAt(j)) {
+                j = pmt[j - 1];
+            }
+            if(s.charAt(i) == t.charAt(j))
+                j ++;
+            if(j == t.length())
+                return i - j + 1;
+        }
+        return -1;
+    }
+
+
     public static void main(String[] args) {
         String s = "hello, this is liuyibobobo.";
         String t = "bo";
         SubstringMatchHelper.matchTest("bruteforce", s, t);
         SubstringMatchHelper.matchTest("rabinKarp", s, t);
+        SubstringMatchHelper.matchTest("KMP", s, t);
 
         // Worst for burteforce
         int n = 1000000, m = 10000;
@@ -63,5 +92,6 @@ public class SubstringMatch {
         tb.append('b');
         SubstringMatchHelper.matchTest("bruteforce", sb.toString(), tb.toString());
         SubstringMatchHelper.matchTest("rabinKarp", sb.toString(), tb.toString());
+        SubstringMatchHelper.matchTest("KMP", sb.toString(), tb.toString());
     }
 }
